@@ -1,0 +1,31 @@
+[package]
+name = "wardstone"
+description = "Sandboxing system for secure tool execution (Seatbelt/Landlock) - magical containment"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["sandbox", "security", "seatbelt", "landlock", "isolation"]
+categories = ["development-tools", "os"]
+
+[dependencies]
+warhorn = { version = "0.1", path = "../warhorn" }
+
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS-specific dependencies (Seatbelt uses built-in sandbox-exec)
+
+[target.'cfg(target_os = "linux")'.dependencies]
+landlock = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+# Windows sandbox dependencies (future)
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true }
+serde_json = { workspace = true }

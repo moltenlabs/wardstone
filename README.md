@@ -1,2 +1,85 @@
-# wardstone
-Sandboxing system for secure tool execution (Seatbelt/Landlock) - magical containment 🛡️
+# 🛡️ Wardstone
+
+Sandboxing system for secure tool execution - magical containment.
+
+[![Crates.io](https://img.shields.io/crates/v/wardstone.svg)](https://crates.io/crates/wardstone)
+[![Documentation](https://docs.rs/wardstone/badge.svg)](https://docs.rs/wardstone)
+[![License](https://img.shields.io/crates/l/wardstone.svg)](LICENSE)
+
+## Overview
+
+Wardstone provides platform-specific sandboxing for AI agent tool execution:
+
+- **macOS**: Seatbelt (sandbox-exec) with auto-generated .sbpl policies
+- **Linux**: Landlock LSM for filesystem isolation
+- **Windows**: Windows Sandbox (planned)
+
+## Features
+
+- 🔒 Filesystem isolation (read/write/execute permissions)
+- 🌐 Network access control
+- ⏱️ Execution timeouts
+- 🎯 Path-based permissions
+- 🔧 Easy policy builder API
+
+## Installation
+
+```toml
+[dependencies]
+wardstone = "0.1"
+```
+
+## Usage
+
+```rust
+use wardstone::{SandboxPolicy, create_sandbox, NetworkPolicy};
+use std::process::Command;
+
+// Create a restrictive policy
+let policy = SandboxPolicy::new()
+    .allow_read("/usr")
+    .allow_read("/lib")
+    .allow_write("./output")
+    .with_network(NetworkPolicy::None)
+    .with_timeout(std::time::Duration::from_secs(60));
+
+// Create platform-specific sandbox
+let sandbox = create_sandbox(policy)?;
+
+// Wrap a command with sandbox restrictions
+let cmd = Command::new("./my-script.sh");
+let sandboxed_cmd = sandbox.wrap_command(cmd)?;
+```
+
+## Policy Builder
+
+```rust
+use wardstone::{SandboxPolicy, NetworkPolicy};
+
+let policy = SandboxPolicy::default_for_tools("/home/user/project".into())
+    .allow_read("/tmp")
+    .allow_localhost()  // Allow localhost network only
+    .allow_spawn(true); // Allow spawning subprocesses
+```
+
+## Platform Support
+
+| Platform | Implementation | Status |
+|----------|----------------|--------|
+| macOS    | Seatbelt       | ✅ Complete |
+| Linux    | Landlock       | ✅ Complete |
+| Windows  | Windows Sandbox| 🚧 Planned |
+
+## Part of the Goblin Family
+
+- [warhorn](https://crates.io/crates/warhorn) - Protocol types
+- [trinkets](https://crates.io/crates/trinkets) - Tool registry
+- **wardstone** - Sandboxing (you are here)
+- [skulk](https://crates.io/crates/skulk) - MCP connections
+- [hutch](https://crates.io/crates/hutch) - Checkpoints
+- [ambush](https://crates.io/crates/ambush) - Task planning
+- [cabal](https://crates.io/crates/cabal) - Orchestration
+
+## License
+
+MIT OR Apache-2.0
